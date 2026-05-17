@@ -652,12 +652,12 @@ npm audit --omit=dev
 npm pack --dry-run
 ```
 
-For provenance publishing, push a semver tag:
+For provenance publishing, push a semver tag that matches `package.json`:
 
 ```bash
-git tag v0.1.0
+git tag v0.1.x
 git push origin main
-git push origin v0.1.0
+git push origin v0.1.x
 ```
 
 The GitHub Actions workflow publishes to npm with provenance:
