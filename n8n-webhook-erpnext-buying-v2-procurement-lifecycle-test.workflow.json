@@ -1,0 +1,422 @@
+[
+  {
+    "id": "buyProcurementLifecycleV2Test01",
+    "name": "ERPNext Buying V2 Procurement Lifecycle Test",
+    "active": false,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "erpnext-buying-v2-procurement-lifecycle-test",
+          "responseMode": "lastNode",
+          "responseData": "allEntries",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -980,
+          0
+        ],
+        "id": "5aa08d31-1e3e-4032-91ce-717847826ce8",
+        "name": "POST Webhook",
+        "webhookId": "erpnext-buying-v2-procurement-lifecycle-test"
+      },
+      {
+        "parameters": {
+          "jsCode": "const now = new Date();\nconst today = now.toISOString().slice(0, 10);\nconst due = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);\nconst runId = `N8N-BUY-LIFECYCLE-${Date.now()}`;\nreturn [{\n  json: {\n    runId,\n    company: 'Thái Duy Digital',\n    warehouse: 'Stores - TDD',\n    transactionDate: today,\n    scheduleDate: due,\n    validTill: due,\n    supplierName: `${runId} Supplier`,\n    itemCode: `${runId}-PROC-ITEM`,\n    qty: 2,\n    rate: 45\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -740,
+          0
+        ],
+        "id": "c1f33357-a11f-4f1e-b8d4-b5b26f611ff1",
+        "name": "Build Run Context"
+      },
+      {
+        "parameters": {
+          "resource": "supplier",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier_name: $node[\"Build Run Context\"].json.supplierName, supplier_type: 'Company', supplier_group: 'All Supplier Groups' }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -500,
+          0
+        ],
+        "id": "161eb97a-303a-41b9-8228-a67612d1221a",
+        "name": "Create Test Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "item",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ item_code: $node[\"Build Run Context\"].json.itemCode, item_name: $node[\"Build Run Context\"].json.itemCode, item_group: 'Products', stock_uom: 'Unit', is_stock_item: 1, is_purchase_item: 1, is_sales_item: 0, valuation_rate: $node[\"Build Run Context\"].json.rate, standard_rate: $node[\"Build Run Context\"].json.rate }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -260,
+          0
+        ],
+        "id": "ba7f1bf5-f734-47f0-b1a7-0612713435a2",
+        "name": "Create Purchase Stock Item V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "materialRequest",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ material_request_type: 'Purchase', company: $node[\"Build Run Context\"].json.company, transaction_date: $node[\"Build Run Context\"].json.transactionDate, schedule_date: $node[\"Build Run Context\"].json.scheduleDate, set_warehouse: $node[\"Build Run Context\"].json.warehouse, items: [{ item_code: $node[\"Build Run Context\"].json.itemCode, qty: $node[\"Build Run Context\"].json.qty, schedule_date: $node[\"Build Run Context\"].json.scheduleDate, warehouse: $node[\"Build Run Context\"].json.warehouse }] }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -20,
+          0
+        ],
+        "id": "43249232-742a-42ac-bf0f-a4ff39fb9c4e",
+        "name": "Create Material Request V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "materialRequest",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          220,
+          0
+        ],
+        "id": "3ecf5e4f-481e-47fd-b58d-42a06fbc1395",
+        "name": "Submit Material Request V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "supplierQuotation",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier: $node[\"Build Run Context\"].json.supplierName, company: $node[\"Build Run Context\"].json.company, transaction_date: $node[\"Build Run Context\"].json.transactionDate, valid_till: $node[\"Build Run Context\"].json.validTill, items: [{ item_code: $node[\"Build Run Context\"].json.itemCode, qty: $node[\"Build Run Context\"].json.qty, rate: $node[\"Build Run Context\"].json.rate, warehouse: $node[\"Build Run Context\"].json.warehouse }] }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          460,
+          0
+        ],
+        "id": "d1866f54-d7fb-4d85-a53a-78ff38c055d1",
+        "name": "Create Supplier Quotation V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "supplierQuotation",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          700,
+          0
+        ],
+        "id": "2ce27a15-97f0-43b0-975a-b2c267f1f37e",
+        "name": "Submit Supplier Quotation V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseOrder",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier: $node[\"Build Run Context\"].json.supplierName, company: $node[\"Build Run Context\"].json.company, transaction_date: $node[\"Build Run Context\"].json.transactionDate, schedule_date: $node[\"Build Run Context\"].json.scheduleDate, set_warehouse: $node[\"Build Run Context\"].json.warehouse, items: [{ item_code: $node[\"Build Run Context\"].json.itemCode, qty: $node[\"Build Run Context\"].json.qty, rate: $node[\"Build Run Context\"].json.rate, schedule_date: $node[\"Build Run Context\"].json.scheduleDate, warehouse: $node[\"Build Run Context\"].json.warehouse }] }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          940,
+          0
+        ],
+        "id": "faaf0ce3-4e1a-4790-bbc5-2d6a5819d388",
+        "name": "Create Purchase Order V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseOrder",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          1180,
+          0
+        ],
+        "id": "6d5b8bec-c6df-4e60-893c-a5c22b53f174",
+        "name": "Submit Purchase Order V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseReceipt",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier: $node[\"Build Run Context\"].json.supplierName, company: $node[\"Build Run Context\"].json.company, posting_date: $node[\"Build Run Context\"].json.transactionDate, set_warehouse: $node[\"Build Run Context\"].json.warehouse, items: [{ item_code: $node[\"Build Run Context\"].json.itemCode, qty: $node[\"Build Run Context\"].json.qty, rate: $node[\"Build Run Context\"].json.rate, warehouse: $node[\"Build Run Context\"].json.warehouse }] }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          1420,
+          0
+        ],
+        "id": "bf54cf3b-b64e-4b40-a913-bd6e6acfa6b2",
+        "name": "Create Purchase Receipt V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseReceipt",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          1660,
+          0
+        ],
+        "id": "d325aa21-d337-4a75-8ea8-6645e6f650fa",
+        "name": "Submit Purchase Receipt V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const docs = {\n  materialRequest: $node['Submit Material Request V2'].json.name,\n  supplierQuotation: $node['Submit Supplier Quotation V2'].json.name,\n  purchaseOrder: $node['Submit Purchase Order V2'].json.name,\n  purchaseReceipt: $node['Submit Purchase Receipt V2'].json.name\n};\nconst serialized = JSON.stringify({ docs, receipt: $node['Submit Purchase Receipt V2'].json });\nconst patterns = [/api[_-]?key/i, /api[_-]?secret/i, /authorization/i, /token\\s+[A-Za-z0-9]/i, /password/i];\nconst securityFindings = patterns.filter((pattern) => pattern.test(serialized)).map((pattern) => pattern.toString());\nreturn [{\n  json: {\n    runId: $node['Build Run Context'].json.runId,\n    status: securityFindings.length === 0 ? 'passed' : 'needs_review',\n    supplier: $node['Build Run Context'].json.supplierName,\n    itemCode: $node['Build Run Context'].json.itemCode,\n    warehouse: $node['Build Run Context'].json.warehouse,\n    qty: $node['Build Run Context'].json.qty,\n    rate: $node['Build Run Context'].json.rate,\n    ...docs,\n    securityFindings,\n    responsePolicy: 'Only document names, procurement totals, and leak-scan status are returned. Credentials and raw upstream errors are not returned by this summary node.'\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1900,
+          0
+        ],
+        "id": "df6699e1-6fb0-4688-b88a-e25354ce6d20",
+        "name": "Return Safe Procurement Summary"
+      }
+    ],
+    "connections": {
+      "POST Webhook": {
+        "main": [
+          [
+            {
+              "node": "Build Run Context",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Run Context": {
+        "main": [
+          [
+            {
+              "node": "Create Test Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Test Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Create Purchase Stock Item V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Purchase Stock Item V2": {
+        "main": [
+          [
+            {
+              "node": "Create Material Request V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Material Request V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Material Request V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Material Request V2": {
+        "main": [
+          [
+            {
+              "node": "Create Supplier Quotation V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Supplier Quotation V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Supplier Quotation V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Supplier Quotation V2": {
+        "main": [
+          [
+            {
+              "node": "Create Purchase Order V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Purchase Order V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Purchase Order V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Purchase Order V2": {
+        "main": [
+          [
+            {
+              "node": "Create Purchase Receipt V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Purchase Receipt V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Purchase Receipt V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Purchase Receipt V2": {
+        "main": [
+          [
+            {
+              "node": "Return Safe Procurement Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Return Safe Procurement Summary": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "tags": []
+  }
+]

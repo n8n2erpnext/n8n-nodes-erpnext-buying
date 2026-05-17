@@ -1,0 +1,81 @@
+[
+  {
+    "id": "buyGetSuppliers01",
+    "name": "ERPNext Buying GET Suppliers Webhook",
+    "active": false,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "erpnext-buying-get-suppliers",
+          "responseMode": "lastNode",
+          "responseData": "allEntries",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "f24975b7-8180-4ff4-bc0f-f304c91f6902",
+        "name": "GET Webhook",
+        "webhookId": "erpnext-buying-get-suppliers"
+      },
+      {
+        "parameters": {
+          "resource": "supplier",
+          "apiVersion": "v1",
+          "operation": "getMany",
+          "fields": "name,supplier_name,supplier_group,supplier_type,country,disabled",
+          "filtersJson": "[]",
+          "returnAll": false,
+          "limit": 20,
+          "orderBy": "modified desc"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          260,
+          0
+        ],
+        "id": "ff72e9a1-b8c8-4a6c-9c85-bbd1b7d9ea4b",
+        "name": "Get Suppliers",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "GET Webhook": {
+        "main": [
+          [
+            {
+              "node": "Get Suppliers",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Suppliers": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "tags": []
+  }
+]
