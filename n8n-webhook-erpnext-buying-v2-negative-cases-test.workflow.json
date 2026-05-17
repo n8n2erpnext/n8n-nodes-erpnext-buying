@@ -1,0 +1,263 @@
+[
+  {
+    "id": "buyNegativeCasesV2Test01",
+    "name": "ERPNext Buying V2 Negative Cases Test",
+    "active": false,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "erpnext-buying-v2-negative-cases-test",
+          "responseMode": "lastNode",
+          "responseData": "allEntries",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -900,
+          0
+        ],
+        "id": "negative-cases-webhook",
+        "name": "POST Webhook",
+        "webhookId": "erpnext-buying-v2-negative-cases-test"
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $json.body ?? {};\nreturn [{\n  json: {\n    company: 'Thái Duy Digital',\n    warehouse: 'Stores - TDD',\n    transactionDate: new Date().toISOString().slice(0, 10),\n    scheduleDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),\n    supplierName: body.supplierName ?? 'N8N-BUY-REAL-1779033077692 NCC Đặc biệt & Space / Test',\n    purchaseOrder: body.purchaseOrder ?? 'PUR-ORD-2026-00003',\n    purchaseReceipt: body.purchaseReceipt ?? 'MAT-PRE-2026-00003',\n    itemCode: body.itemCode ?? 'N8N-BUY-REAL-1779033077692 Hàng mua đặc biệt A',\n    fakePurchaseOrderName: body.fakePurchaseOrderName ?? 'BAD / DOC NAME With Space'\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -680,
+          0
+        ],
+        "id": "build-negative-context",
+        "name": "Build Negative Context"
+      },
+      {
+        "parameters": {
+          "resource": "supplier",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier_name: $node[\"Build Negative Context\"].json.supplierName, supplier_type: \"Company\", supplier_group: \"All Supplier Groups\" }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -460,
+          0
+        ],
+        "id": "try-duplicate-supplier-v2",
+        "name": "Try Duplicate Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        },
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "resource": "purchaseOrder",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ company: $node[\"Build Negative Context\"].json.company, transaction_date: $node[\"Build Negative Context\"].json.transactionDate, schedule_date: $node[\"Build Negative Context\"].json.scheduleDate, set_warehouse: $node[\"Build Negative Context\"].json.warehouse, items: [{ item_code: $node[\"Build Negative Context\"].json.itemCode, qty: 1, rate: 10, schedule_date: $node[\"Build Negative Context\"].json.scheduleDate, warehouse: $node[\"Build Negative Context\"].json.warehouse }] }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -240,
+          0
+        ],
+        "id": "try-create-po-missing-supplier-v2",
+        "name": "Try Create PO Missing Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        },
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "resource": "purchaseOrder",
+          "apiVersion": "v2",
+          "operation": "cancel",
+          "documentName": "={{ $node[\"Build Negative Context\"].json.purchaseOrder }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -20,
+          0
+        ],
+        "id": "try-cancel-linked-purchase-order-v2",
+        "name": "Try Cancel Linked Purchase Order V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        },
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "resource": "purchaseReceipt",
+          "apiVersion": "v2",
+          "operation": "delete",
+          "documentName": "={{ $node[\"Build Negative Context\"].json.purchaseReceipt }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          200,
+          0
+        ],
+        "id": "try-delete-submitted-purchase-receipt-v2",
+        "name": "Try Delete Submitted Purchase Receipt V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        },
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "resource": "customDocType",
+          "customDocType": "Purchase Order",
+          "apiVersion": "v2",
+          "operation": "get",
+          "documentName": "={{ $node[\"Build Negative Context\"].json.fakePurchaseOrderName }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          420,
+          0
+        ],
+        "id": "try-get-missing-slash-name-custom-po-v2",
+        "name": "Try Get Missing Slash Name Custom PO V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        },
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "jsCode": "const checks = [\n  ['duplicateSupplier', $node['Try Duplicate Supplier V2'].json],\n  ['missingSupplierPurchaseOrder', $node['Try Create PO Missing Supplier V2'].json],\n  ['cancelLinkedPurchaseOrder', $node['Try Cancel Linked Purchase Order V2'].json],\n  ['deleteSubmittedPurchaseReceipt', $node['Try Delete Submitted Purchase Receipt V2'].json],\n  ['missingSlashSpaceDocName', $node['Try Get Missing Slash Name Custom PO V2'].json],\n];\nfunction summarize(value) {\n  const text = JSON.stringify(value);\n  const leaked = [/api[_-]?key/i, /api[_-]?secret/i, /authorization/i, /token\\s+[A-Za-z0-9]/i, /password/i].some((pattern) => pattern.test(text));\n  const message = value?.error?.message ?? value?.message ?? value?.description ?? 'No error message returned';\n  const failedAsExpected = Boolean(value?.error || value?.httpCode || value?.message || value?.description);\n  return { failedAsExpected, message: String(message).slice(0, 240), leakedCredentialLikeText: leaked };\n}\nconst results = Object.fromEntries(checks.map(([name, value]) => [name, summarize(value)]));\nconst allFailedAsExpected = Object.values(results).every((result) => result.failedAsExpected);\nconst securityFindings = Object.entries(results).filter(([, result]) => result.leakedCredentialLikeText).map(([name]) => name);\nreturn [{\n  json: {\n    status: allFailedAsExpected && securityFindings.length === 0 ? 'passed' : 'needs_review',\n    purchaseOrderUnderTest: $node['Build Negative Context'].json.purchaseOrder,\n    purchaseReceiptUnderTest: $node['Build Negative Context'].json.purchaseReceipt,\n    results,\n    securityFindings,\n    responsePolicy: 'Only short error summaries are returned. Raw ERPNext error payloads and credentials are not returned.'\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          640,
+          0
+        ],
+        "id": "return-safe-negative-summary",
+        "name": "Return Safe Negative Summary"
+      }
+    ],
+    "connections": {
+      "POST Webhook": {
+        "main": [
+          [
+            {
+              "node": "Build Negative Context",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Negative Context": {
+        "main": [
+          [
+            {
+              "node": "Try Duplicate Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Try Duplicate Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Try Create PO Missing Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Try Create PO Missing Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Try Cancel Linked Purchase Order V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Try Cancel Linked Purchase Order V2": {
+        "main": [
+          [
+            {
+              "node": "Try Delete Submitted Purchase Receipt V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Try Delete Submitted Purchase Receipt V2": {
+        "main": [
+          [
+            {
+              "node": "Try Get Missing Slash Name Custom PO V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Try Get Missing Slash Name Custom PO V2": {
+        "main": [
+          [
+            {
+              "node": "Return Safe Negative Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Return Safe Negative Summary": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "tags": []
+  }
+]

@@ -1,0 +1,1121 @@
+[
+  {
+    "id": "buyRealProcurementFlowV2Test01",
+    "name": "ERPNext Buying V2 Real Procurement Flow Test",
+    "active": false,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "erpnext-buying-v2-real-procurement-flow-test",
+          "responseMode": "lastNode",
+          "responseData": "allEntries",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -1400,
+          0
+        ],
+        "id": "real-procurement-webhook",
+        "name": "POST Webhook",
+        "webhookId": "erpnext-buying-v2-real-procurement-flow-test"
+      },
+      {
+        "parameters": {
+          "jsCode": "const now = new Date();\nconst today = now.toISOString().slice(0, 10);\nconst due = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);\nconst stamp = Date.now();\nconst runId = `N8N-BUY-REAL-${stamp}`;\nreturn [{\n  json: {\n    runId,\n    company: 'Thái Duy Digital',\n    warehouse: 'Stores - TDD',\n    rejectedWarehouse: 'Goods In Transit - TDD',\n    transactionDate: today,\n    scheduleDate: due,\n    validTill: due,\n    dueDate: due,\n    supplierName: `${runId} NCC Đặc biệt & Space / Test`,\n    disabledSupplierName: `${runId} Disabled Supplier`,\n    altSupplierName: `${runId} Alt Supplier`,\n    itemA: `${runId} Hàng mua đặc biệt A`,\n    itemB: `${runId} Item With Spaces B`,\n    qtyA: 2,\n    qtyB: 3,\n    receiptQtyA: 1,\n    receiptQtyB: 1,\n    rateA: 125,\n    rateB: 80,\n    accounts: {\n      cash: '1110 - Cash - TDD',\n      payable: '2110 - Creditors - TDD',\n      expense: '5111 - Cost of Goods Sold - TDD'\n    },\n    taxTemplate: 'Vietnam Tax - TDD'\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1180,
+          0
+        ],
+        "id": "build-real-procurement-context",
+        "name": "Build Real Procurement Context"
+      },
+      {
+        "parameters": {
+          "resource": "supplier",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier_name: $node[\"Build Real Procurement Context\"].json.supplierName, supplier_type: \"Company\", supplier_group: \"All Supplier Groups\" }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -960,
+          0
+        ],
+        "id": "create-special-supplier-v2",
+        "name": "Create Special Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "supplier",
+          "apiVersion": "v2",
+          "operation": "get",
+          "documentName": "={{ $node[\"Create Special Supplier V2\"].json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -740,
+          0
+        ],
+        "id": "get-special-supplier-v2",
+        "name": "Get Special Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "supplier",
+          "apiVersion": "v2",
+          "operation": "update",
+          "documentName": "={{ $node[\"Create Special Supplier V2\"].json.name }}",
+          "dataJson": "={{ JSON.stringify({ supplier_details: `${$node[\"Build Real Procurement Context\"].json.runId} update test with Vietnamese supplier name and slash-safe document lookup.` }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -520,
+          0
+        ],
+        "id": "update-special-supplier-v2",
+        "name": "Update Special Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "supplier",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier_name: $node[\"Build Real Procurement Context\"].json.disabledSupplierName, supplier_type: \"Company\", supplier_group: \"All Supplier Groups\", disabled: 1 }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -300,
+          0
+        ],
+        "id": "create-disabled-supplier-v2",
+        "name": "Create Disabled Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "supplier",
+          "apiVersion": "v2",
+          "operation": "get",
+          "documentName": "={{ $node[\"Create Disabled Supplier V2\"].json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -80,
+          0
+        ],
+        "id": "get-disabled-supplier-v2",
+        "name": "Get Disabled Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "supplier",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier_name: $node[\"Build Real Procurement Context\"].json.altSupplierName, supplier_type: \"Company\", supplier_group: \"All Supplier Groups\" }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          140,
+          0
+        ],
+        "id": "create-alternate-supplier-v2",
+        "name": "Create Alternate Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "item",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ item_code: $node[\"Build Real Procurement Context\"].json.itemA, item_name: $node[\"Build Real Procurement Context\"].json.itemA, item_group: \"Products\", stock_uom: \"Unit\", is_stock_item: 1, is_purchase_item: 1, is_sales_item: 0, valuation_rate: $node[\"Build Real Procurement Context\"].json.rateA, standard_rate: $node[\"Build Real Procurement Context\"].json.rateA }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          360,
+          0
+        ],
+        "id": "create-purchase-item-a-v2",
+        "name": "Create Purchase Item A V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "item",
+          "apiVersion": "v2",
+          "operation": "get",
+          "documentName": "={{ $node[\"Create Purchase Item A V2\"].json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          580,
+          0
+        ],
+        "id": "get-purchase-item-a-v2",
+        "name": "Get Purchase Item A V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "item",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ item_code: $node[\"Build Real Procurement Context\"].json.itemB, item_name: $node[\"Build Real Procurement Context\"].json.itemB, item_group: \"Products\", stock_uom: \"Unit\", is_stock_item: 1, is_purchase_item: 1, is_sales_item: 0, valuation_rate: $node[\"Build Real Procurement Context\"].json.rateB, standard_rate: $node[\"Build Real Procurement Context\"].json.rateB }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          800,
+          0
+        ],
+        "id": "create-purchase-item-b-v2",
+        "name": "Create Purchase Item B V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "materialRequest",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ material_request_type: \"Purchase\", company: $node[\"Build Real Procurement Context\"].json.company, transaction_date: $node[\"Build Real Procurement Context\"].json.transactionDate, schedule_date: $node[\"Build Real Procurement Context\"].json.scheduleDate, set_warehouse: $node[\"Build Real Procurement Context\"].json.warehouse, items: [{ item_code: $node[\"Build Real Procurement Context\"].json.itemA, qty: $node[\"Build Real Procurement Context\"].json.qtyA, schedule_date: $node[\"Build Real Procurement Context\"].json.scheduleDate, warehouse: $node[\"Build Real Procurement Context\"].json.warehouse }, { item_code: $node[\"Build Real Procurement Context\"].json.itemB, qty: $node[\"Build Real Procurement Context\"].json.qtyB, schedule_date: $node[\"Build Real Procurement Context\"].json.scheduleDate, warehouse: $node[\"Build Real Procurement Context\"].json.warehouse }] }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          1020,
+          0
+        ],
+        "id": "create-material-request-multi-item-v2",
+        "name": "Create Material Request Multi Item V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "materialRequest",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          1240,
+          0
+        ],
+        "id": "submit-material-request-multi-item-v2",
+        "name": "Submit Material Request Multi Item V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "requestForQuotation",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ company: $node[\"Build Real Procurement Context\"].json.company, transaction_date: $node[\"Build Real Procurement Context\"].json.transactionDate, schedule_date: $node[\"Build Real Procurement Context\"].json.scheduleDate, subject: `${$node[\"Build Real Procurement Context\"].json.runId} RFQ multi supplier`, status: \"Draft\", suppliers: [{ supplier: $node[\"Build Real Procurement Context\"].json.supplierName }, { supplier: $node[\"Build Real Procurement Context\"].json.altSupplierName }], items: [{ item_code: $node[\"Build Real Procurement Context\"].json.itemA, qty: $node[\"Build Real Procurement Context\"].json.qtyA, schedule_date: $node[\"Build Real Procurement Context\"].json.scheduleDate, warehouse: $node[\"Build Real Procurement Context\"].json.warehouse, stock_uom: \"Unit\", uom: \"Unit\", conversion_factor: 1 }, { item_code: $node[\"Build Real Procurement Context\"].json.itemB, qty: $node[\"Build Real Procurement Context\"].json.qtyB, schedule_date: $node[\"Build Real Procurement Context\"].json.scheduleDate, warehouse: $node[\"Build Real Procurement Context\"].json.warehouse, stock_uom: \"Unit\", uom: \"Unit\", conversion_factor: 1 }] }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          1460,
+          0
+        ],
+        "id": "create-rfq-multi-supplier-v2",
+        "name": "Create RFQ Multi Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "requestForQuotation",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          1680,
+          0
+        ],
+        "id": "submit-rfq-multi-supplier-v2",
+        "name": "Submit RFQ Multi Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "requestForQuotation",
+          "apiVersion": "v2",
+          "operation": "cancel",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          1900,
+          0
+        ],
+        "id": "cancel-rfq-multi-supplier-v2",
+        "name": "Cancel RFQ Multi Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "supplierQuotation",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier: $node[\"Build Real Procurement Context\"].json.supplierName, company: $node[\"Build Real Procurement Context\"].json.company, transaction_date: $node[\"Build Real Procurement Context\"].json.transactionDate, valid_till: $node[\"Build Real Procurement Context\"].json.validTill, currency: \"VND\", taxes_and_charges: $node[\"Build Real Procurement Context\"].json.taxTemplate, items: [{ item_code: $node[\"Build Real Procurement Context\"].json.itemA, qty: $node[\"Build Real Procurement Context\"].json.qtyA, rate: $node[\"Build Real Procurement Context\"].json.rateA, warehouse: $node[\"Build Real Procurement Context\"].json.warehouse }, { item_code: $node[\"Build Real Procurement Context\"].json.itemB, qty: $node[\"Build Real Procurement Context\"].json.qtyB, rate: $node[\"Build Real Procurement Context\"].json.rateB, warehouse: $node[\"Build Real Procurement Context\"].json.warehouse }] }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          2120,
+          0
+        ],
+        "id": "create-supplier-quotation-multi-item-v2",
+        "name": "Create Supplier Quotation Multi Item V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "supplierQuotation",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          2340,
+          0
+        ],
+        "id": "submit-supplier-quotation-multi-item-v2",
+        "name": "Submit Supplier Quotation Multi Item V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseOrder",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier: $node[\"Build Real Procurement Context\"].json.supplierName, company: $node[\"Build Real Procurement Context\"].json.company, transaction_date: $node[\"Build Real Procurement Context\"].json.transactionDate, schedule_date: $node[\"Build Real Procurement Context\"].json.scheduleDate, set_warehouse: $node[\"Build Real Procurement Context\"].json.warehouse, taxes_and_charges: $node[\"Build Real Procurement Context\"].json.taxTemplate, apply_discount_on: \"Grand Total\", discount_amount: 5, items: [{ item_code: $node[\"Build Real Procurement Context\"].json.itemA, qty: $node[\"Build Real Procurement Context\"].json.qtyA, rate: $node[\"Build Real Procurement Context\"].json.rateA, schedule_date: $node[\"Build Real Procurement Context\"].json.scheduleDate, warehouse: $node[\"Build Real Procurement Context\"].json.warehouse }, { item_code: $node[\"Build Real Procurement Context\"].json.itemB, qty: $node[\"Build Real Procurement Context\"].json.qtyB, rate: $node[\"Build Real Procurement Context\"].json.rateB, schedule_date: $node[\"Build Real Procurement Context\"].json.scheduleDate, warehouse: $node[\"Build Real Procurement Context\"].json.warehouse }] }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          2560,
+          0
+        ],
+        "id": "create-core-purchase-order-v2",
+        "name": "Create Core Purchase Order V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseOrder",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          2780,
+          0
+        ],
+        "id": "submit-core-purchase-order-v2",
+        "name": "Submit Core Purchase Order V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const ctx = $node['Build Real Procurement Context'].json;\nconst po = $node['Submit Core Purchase Order V2'].json;\nconst items = po.items.map((row, index) => ({\n  item_code: row.item_code,\n  qty: index === 0 ? ctx.receiptQtyA : ctx.receiptQtyB,\n  rate: row.rate,\n  warehouse: ctx.warehouse,\n  purchase_order: po.name,\n  purchase_order_item: row.name\n}));\nreturn [{ json: { payload: { supplier: ctx.supplierName, company: ctx.company, posting_date: ctx.transactionDate, set_warehouse: ctx.warehouse, items } } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3000,
+          0
+        ],
+        "id": "build-partial-receipt-payload",
+        "name": "Build Partial Receipt Payload"
+      },
+      {
+        "parameters": {
+          "resource": "purchaseReceipt",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify($json.payload) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          3220,
+          0
+        ],
+        "id": "create-partial-purchase-receipt-v2",
+        "name": "Create Partial Purchase Receipt V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseReceipt",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          3440,
+          0
+        ],
+        "id": "submit-partial-purchase-receipt-v2",
+        "name": "Submit Partial Purchase Receipt V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const ctx = $node['Build Real Procurement Context'].json;\nconst pr = $node['Submit Partial Purchase Receipt V2'].json;\nconst items = pr.items.map((row) => ({\n  item_code: row.item_code,\n  qty: row.qty,\n  rate: row.rate,\n  expense_account: ctx.accounts.expense,\n  purchase_receipt: pr.name,\n  pr_detail: row.name,\n  purchase_order: row.purchase_order,\n  po_detail: row.purchase_order_item\n}));\nreturn [{ json: { payload: { supplier: ctx.supplierName, company: ctx.company, posting_date: ctx.transactionDate, due_date: ctx.dueDate, credit_to: ctx.accounts.payable, taxes_and_charges: ctx.taxTemplate, remarks: `${ctx.runId} purchase invoice from receipt test`, items } } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3660,
+          0
+        ],
+        "id": "build-purchase-invoice-payload",
+        "name": "Build Purchase Invoice Payload"
+      },
+      {
+        "parameters": {
+          "resource": "customDocType",
+          "customDocType": "Purchase Invoice",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify($json.payload) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          3880,
+          0
+        ],
+        "id": "create-purchase-invoice-custom-v2",
+        "name": "Create Purchase Invoice Custom V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "customDocType",
+          "customDocType": "Purchase Invoice",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          4100,
+          0
+        ],
+        "id": "submit-purchase-invoice-custom-v2",
+        "name": "Submit Purchase Invoice Custom V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const ctx = $node['Build Real Procurement Context'].json;\nconst invoice = $node['Submit Purchase Invoice Custom V2'].json;\nconst amount = Math.round(Number(invoice.grand_total || invoice.rounded_total || 0) / 2);\nreturn [{ json: { payload: { payment_type: 'Pay', company: ctx.company, posting_date: ctx.transactionDate, party_type: 'Supplier', party: ctx.supplierName, paid_from: ctx.accounts.cash, paid_to: ctx.accounts.payable, paid_amount: amount, received_amount: amount, remarks: `${ctx.runId} partial payment then cancel test`, references: [{ reference_doctype: 'Purchase Invoice', reference_name: invoice.name, allocated_amount: amount }] } } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          4320,
+          0
+        ],
+        "id": "build-partial-payment-payload",
+        "name": "Build Partial Payment Payload"
+      },
+      {
+        "parameters": {
+          "resource": "customDocType",
+          "customDocType": "Payment Entry",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify($json.payload) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          4540,
+          0
+        ],
+        "id": "create-partial-payment-entry-custom-v2",
+        "name": "Create Partial Payment Entry Custom V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "customDocType",
+          "customDocType": "Payment Entry",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          4760,
+          0
+        ],
+        "id": "submit-partial-payment-entry-custom-v2",
+        "name": "Submit Partial Payment Entry Custom V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "customDocType",
+          "customDocType": "Payment Entry",
+          "apiVersion": "v2",
+          "operation": "cancel",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          4980,
+          0
+        ],
+        "id": "cancel-partial-payment-entry-custom-v2",
+        "name": "Cancel Partial Payment Entry Custom V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const ctx = $node['Build Real Procurement Context'].json;\nconst invoice = $node['Submit Purchase Invoice Custom V2'].json;\nconst amount = Number(invoice.grand_total || invoice.rounded_total || 0);\nreturn [{ json: { payload: { payment_type: 'Pay', company: ctx.company, posting_date: ctx.transactionDate, party_type: 'Supplier', party: ctx.supplierName, paid_from: ctx.accounts.cash, paid_to: ctx.accounts.payable, paid_amount: amount, received_amount: amount, remarks: `${ctx.runId} full payment test`, references: [{ reference_doctype: 'Purchase Invoice', reference_name: invoice.name, allocated_amount: amount }] } } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          5200,
+          0
+        ],
+        "id": "build-full-payment-payload",
+        "name": "Build Full Payment Payload"
+      },
+      {
+        "parameters": {
+          "resource": "customDocType",
+          "customDocType": "Payment Entry",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify($json.payload) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          5420,
+          0
+        ],
+        "id": "create-full-payment-entry-custom-v2",
+        "name": "Create Full Payment Entry Custom V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "customDocType",
+          "customDocType": "Payment Entry",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          5640,
+          0
+        ],
+        "id": "submit-full-payment-entry-custom-v2",
+        "name": "Submit Full Payment Entry Custom V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "customDocType",
+          "customDocType": "Purchase Order",
+          "apiVersion": "v2",
+          "operation": "get",
+          "documentName": "={{ $node[\"Submit Core Purchase Order V2\"].json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          5860,
+          0
+        ],
+        "id": "get-purchase-order-by-custom-doctype-v2",
+        "name": "Get Purchase Order By Custom DocType V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const ctx = $node['Build Real Procurement Context'].json;\nconst docs = {\n  supplier: $node['Create Special Supplier V2'].json.name,\n  disabledSupplier: $node['Create Disabled Supplier V2'].json.name,\n  itemA: $node['Create Purchase Item A V2'].json.name,\n  itemB: $node['Create Purchase Item B V2'].json.name,\n  materialRequest: $node['Submit Material Request Multi Item V2'].json.name,\n  requestForQuotation: $node['Cancel RFQ Multi Supplier V2'].json.name,\n  supplierQuotation: $node['Submit Supplier Quotation Multi Item V2'].json.name,\n  purchaseOrder: $node['Submit Core Purchase Order V2'].json.name,\n  purchaseReceipt: $node['Submit Partial Purchase Receipt V2'].json.name,\n  purchaseInvoice: $node['Submit Purchase Invoice Custom V2'].json.name,\n  partialPaymentEntryCancelled: $node['Cancel Partial Payment Entry Custom V2'].json.name,\n  fullPaymentEntry: $node['Submit Full Payment Entry Custom V2'].json.name\n};\nconst invoice = $node['Submit Purchase Invoice Custom V2'].json;\nconst fullPayment = $node['Submit Full Payment Entry Custom V2'].json;\nconst po = $node['Get Purchase Order By Custom DocType V2'].json;\nconst serialized = JSON.stringify({ docs, invoice: { name: invoice.name, grand_total: invoice.grand_total }, payment: { name: fullPayment.name, paid_amount: fullPayment.paid_amount } });\nconst patterns = [/api[_-]?key/i, /api[_-]?secret/i, /authorization/i, /token\\s+[A-Za-z0-9]/i, /password/i];\nconst securityFindings = patterns.filter((pattern) => pattern.test(serialized)).map((pattern) => pattern.toString());\nreturn [{ json: {\n  runId: ctx.runId,\n  status: securityFindings.length === 0 ? 'passed' : 'needs_review',\n  supplierSpecialChars: ctx.supplierName,\n  disabledSupplierDisabled: $node['Get Disabled Supplier V2'].json.disabled,\n  purchaseOrderDocTypeSpaceReadback: po.name,\n  purchaseInvoiceGrandTotal: invoice.grand_total,\n  fullPaymentPaidAmount: fullPayment.paid_amount,\n  docs,\n  securityFindings,\n  responsePolicy: 'Only document names, totals, and leak-scan status are returned. Credentials and raw upstream errors are not returned by this summary node.'\n} }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          6080,
+          0
+        ],
+        "id": "return-safe-real-procurement-summary",
+        "name": "Return Safe Real Procurement Summary"
+      }
+    ],
+    "connections": {
+      "POST Webhook": {
+        "main": [
+          [
+            {
+              "node": "Build Real Procurement Context",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Real Procurement Context": {
+        "main": [
+          [
+            {
+              "node": "Create Special Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Special Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Get Special Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Special Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Update Special Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update Special Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Create Disabled Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Disabled Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Get Disabled Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Disabled Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Create Alternate Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Alternate Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Create Purchase Item A V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Purchase Item A V2": {
+        "main": [
+          [
+            {
+              "node": "Get Purchase Item A V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Purchase Item A V2": {
+        "main": [
+          [
+            {
+              "node": "Create Purchase Item B V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Purchase Item B V2": {
+        "main": [
+          [
+            {
+              "node": "Create Material Request Multi Item V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Material Request Multi Item V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Material Request Multi Item V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Material Request Multi Item V2": {
+        "main": [
+          [
+            {
+              "node": "Create RFQ Multi Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create RFQ Multi Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Submit RFQ Multi Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit RFQ Multi Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Cancel RFQ Multi Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cancel RFQ Multi Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Create Supplier Quotation Multi Item V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Supplier Quotation Multi Item V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Supplier Quotation Multi Item V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Supplier Quotation Multi Item V2": {
+        "main": [
+          [
+            {
+              "node": "Create Core Purchase Order V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Core Purchase Order V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Core Purchase Order V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Core Purchase Order V2": {
+        "main": [
+          [
+            {
+              "node": "Build Partial Receipt Payload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Partial Receipt Payload": {
+        "main": [
+          [
+            {
+              "node": "Create Partial Purchase Receipt V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Partial Purchase Receipt V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Partial Purchase Receipt V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Partial Purchase Receipt V2": {
+        "main": [
+          [
+            {
+              "node": "Build Purchase Invoice Payload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Purchase Invoice Payload": {
+        "main": [
+          [
+            {
+              "node": "Create Purchase Invoice Custom V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Purchase Invoice Custom V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Purchase Invoice Custom V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Purchase Invoice Custom V2": {
+        "main": [
+          [
+            {
+              "node": "Build Partial Payment Payload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Partial Payment Payload": {
+        "main": [
+          [
+            {
+              "node": "Create Partial Payment Entry Custom V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Partial Payment Entry Custom V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Partial Payment Entry Custom V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Partial Payment Entry Custom V2": {
+        "main": [
+          [
+            {
+              "node": "Cancel Partial Payment Entry Custom V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cancel Partial Payment Entry Custom V2": {
+        "main": [
+          [
+            {
+              "node": "Build Full Payment Payload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Full Payment Payload": {
+        "main": [
+          [
+            {
+              "node": "Create Full Payment Entry Custom V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Full Payment Entry Custom V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Full Payment Entry Custom V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Full Payment Entry Custom V2": {
+        "main": [
+          [
+            {
+              "node": "Get Purchase Order By Custom DocType V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Purchase Order By Custom DocType V2": {
+        "main": [
+          [
+            {
+              "node": "Return Safe Real Procurement Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Return Safe Real Procurement Summary": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "tags": []
+  }
+]

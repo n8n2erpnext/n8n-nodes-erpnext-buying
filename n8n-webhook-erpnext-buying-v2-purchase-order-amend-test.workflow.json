@@ -1,0 +1,323 @@
+[
+  {
+    "id": "buyPurchaseOrderAmendV2Test01",
+    "name": "ERPNext Buying V2 Purchase Order Amend Test",
+    "active": false,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "erpnext-buying-v2-purchase-order-amend-test",
+          "responseMode": "lastNode",
+          "responseData": "allEntries",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -900,
+          0
+        ],
+        "id": "po-amend-webhook",
+        "name": "POST Webhook",
+        "webhookId": "erpnext-buying-v2-purchase-order-amend-test"
+      },
+      {
+        "parameters": {
+          "jsCode": "const now = new Date();\nconst today = now.toISOString().slice(0, 10);\nconst due = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);\nconst runId = `N8N-BUY-AMEND-${Date.now()}`;\nreturn [{ json: {\n  runId,\n  company: 'Thái Duy Digital',\n  warehouse: 'Stores - TDD',\n  transactionDate: today,\n  scheduleDate: due,\n  supplierName: `${runId} Supplier`,\n  itemCode: `${runId} Item`,\n  originalQty: 1,\n  amendedQty: 2,\n  rate: 70\n} }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -680,
+          0
+        ],
+        "id": "build-amend-context",
+        "name": "Build Amend Context"
+      },
+      {
+        "parameters": {
+          "resource": "supplier",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier_name: $node[\"Build Amend Context\"].json.supplierName, supplier_type: \"Company\", supplier_group: \"All Supplier Groups\" }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -460,
+          0
+        ],
+        "id": "create-amend-supplier-v2",
+        "name": "Create Amend Supplier V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "item",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ item_code: $node[\"Build Amend Context\"].json.itemCode, item_name: $node[\"Build Amend Context\"].json.itemCode, item_group: \"Products\", stock_uom: \"Unit\", is_stock_item: 1, is_purchase_item: 1, is_sales_item: 0, valuation_rate: $node[\"Build Amend Context\"].json.rate, standard_rate: $node[\"Build Amend Context\"].json.rate }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -240,
+          0
+        ],
+        "id": "create-amend-item-v2",
+        "name": "Create Amend Item V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseOrder",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier: $node[\"Build Amend Context\"].json.supplierName, company: $node[\"Build Amend Context\"].json.company, transaction_date: $node[\"Build Amend Context\"].json.transactionDate, schedule_date: $node[\"Build Amend Context\"].json.scheduleDate, set_warehouse: $node[\"Build Amend Context\"].json.warehouse, items: [{ item_code: $node[\"Build Amend Context\"].json.itemCode, qty: $node[\"Build Amend Context\"].json.originalQty, rate: $node[\"Build Amend Context\"].json.rate, schedule_date: $node[\"Build Amend Context\"].json.scheduleDate, warehouse: $node[\"Build Amend Context\"].json.warehouse }] }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          -20,
+          0
+        ],
+        "id": "create-original-po-v2",
+        "name": "Create Original PO V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseOrder",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          200,
+          0
+        ],
+        "id": "submit-original-po-v2",
+        "name": "Submit Original PO V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseOrder",
+          "apiVersion": "v2",
+          "operation": "cancel",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          420,
+          0
+        ],
+        "id": "cancel-original-po-v2",
+        "name": "Cancel Original PO V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseOrder",
+          "apiVersion": "v2",
+          "operation": "create",
+          "dataJson": "={{ JSON.stringify({ supplier: $node[\"Build Amend Context\"].json.supplierName, company: $node[\"Build Amend Context\"].json.company, transaction_date: $node[\"Build Amend Context\"].json.transactionDate, schedule_date: $node[\"Build Amend Context\"].json.scheduleDate, set_warehouse: $node[\"Build Amend Context\"].json.warehouse, amended_from: $node[\"Cancel Original PO V2\"].json.name, items: [{ item_code: $node[\"Build Amend Context\"].json.itemCode, qty: $node[\"Build Amend Context\"].json.amendedQty, rate: $node[\"Build Amend Context\"].json.rate, schedule_date: $node[\"Build Amend Context\"].json.scheduleDate, warehouse: $node[\"Build Amend Context\"].json.warehouse }] }) }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          640,
+          0
+        ],
+        "id": "create-amended-po-v2",
+        "name": "Create Amended PO V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "purchaseOrder",
+          "apiVersion": "v2",
+          "operation": "submit",
+          "documentName": "={{ $json.name }}"
+        },
+        "type": "n8n-nodes-erpnext-buying.erpNextBuying",
+        "typeVersion": 1,
+        "position": [
+          860,
+          0
+        ],
+        "id": "submit-amended-po-v2",
+        "name": "Submit Amended PO V2",
+        "credentials": {
+          "erpNextApi": {
+            "id": "9hFY985G0WpX5Xyt",
+            "name": "ERPNext account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const original = $node['Cancel Original PO V2'].json;\nconst amended = $node['Submit Amended PO V2'].json;\nreturn [{ json: {\n  status: original.docstatus === 2 && amended.docstatus === 1 && amended.amended_from === original.name ? 'passed' : 'needs_review',\n  runId: $node['Build Amend Context'].json.runId,\n  originalPurchaseOrder: original.name,\n  originalDocstatus: original.docstatus,\n  amendedPurchaseOrder: amended.name,\n  amendedFrom: amended.amended_from,\n  amendedDocstatus: amended.docstatus,\n  amendedQty: amended.items?.[0]?.qty,\n  responsePolicy: 'Only document names and amendment status are returned.'\n} }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1080,
+          0
+        ],
+        "id": "return-safe-amend-summary",
+        "name": "Return Safe Amend Summary"
+      }
+    ],
+    "connections": {
+      "POST Webhook": {
+        "main": [
+          [
+            {
+              "node": "Build Amend Context",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Amend Context": {
+        "main": [
+          [
+            {
+              "node": "Create Amend Supplier V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Amend Supplier V2": {
+        "main": [
+          [
+            {
+              "node": "Create Amend Item V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Amend Item V2": {
+        "main": [
+          [
+            {
+              "node": "Create Original PO V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Original PO V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Original PO V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Original PO V2": {
+        "main": [
+          [
+            {
+              "node": "Cancel Original PO V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cancel Original PO V2": {
+        "main": [
+          [
+            {
+              "node": "Create Amended PO V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Amended PO V2": {
+        "main": [
+          [
+            {
+              "node": "Submit Amended PO V2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Submit Amended PO V2": {
+        "main": [
+          [
+            {
+              "node": "Return Safe Amend Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Return Safe Amend Summary": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "tags": []
+  }
+]

@@ -143,3 +143,80 @@ Live test result:
 - Stock Ledger Entry: `2` units of `N8N-BUY-LIFECYCLE-1779032443792-PROC-ITEM` into `Stores - TDD`.
 - Security scan summary returned `securityFindings: []`.
 - Temporary workflow was deactivated after verification and now returns `404 Active version not found`.
+
+### Real Procurement Flow
+
+Workflow artifact:
+
+```text
+n8n-webhook-erpnext-buying-v2-real-procurement-flow-test.workflow.json
+```
+
+This workflow tests Buying as an ERP workflow, not just CRUD:
+
+```text
+Supplier with Vietnamese/special characters
+-> Supplier get/update
+-> Disabled Supplier readback
+-> Two purchase Items with Vietnamese/spaces
+-> Multi-item Material Request submit
+-> Multi-supplier RFQ submit/cancel
+-> Multi-item Supplier Quotation submit
+-> Multi-item Purchase Order with tax template and discount
+-> Partial Purchase Receipt from Purchase Order
+-> Purchase Invoice via Custom DocType
+-> Partial Payment Entry submit/cancel via Custom DocType
+-> Full Payment Entry via Custom DocType
+-> Purchase Order readback via Custom DocType "Purchase Order"
+```
+
+Live test result:
+
+- `POST /webhook/erpnext-buying-v2-real-procurement-flow-test` returned `200 OK`.
+- Run ID: `N8N-BUY-REAL-1779033077692`.
+- Supplier with slash/spaces/Vietnamese characters: `N8N-BUY-REAL-1779033077692 NCC Đặc biệt & Space / Test`.
+- Disabled supplier readback returned `disabled: 1`.
+- RFQ `PUR-RFQ-2026-00001` was submitted then cancelled.
+- Supplier Quotation `PUR-SQTN-2026-00003` submitted with grand total `490`.
+- Purchase Order `PUR-ORD-2026-00003` submitted with two items, discount `5`, grand total `485`, and `per_received 40`.
+- Purchase Receipt `MAT-PRE-2026-00003` submitted as partial receipt with stock ledger rows for both items.
+- Purchase Invoice `ACC-PINV-2026-00002` submitted and paid, grand total `205`, outstanding amount `0`.
+- Partial Payment Entry `ACC-PAY-2026-00003` was submitted then cancelled.
+- Full Payment Entry `ACC-PAY-2026-00004` was submitted for `205`.
+- Security scan summary returned `securityFindings: []`.
+- Temporary workflow was deactivated after verification and now returns `404 Active version not found`.
+
+### Purchase Order Amend
+
+Workflow artifact:
+
+```text
+n8n-webhook-erpnext-buying-v2-purchase-order-amend-test.workflow.json
+```
+
+Live test result:
+
+- Original Purchase Order `PUR-ORD-2026-00004` was submitted then cancelled.
+- Amended Purchase Order `PUR-ORD-2026-00004-1` was created with `amended_from: PUR-ORD-2026-00004`.
+- Amended Purchase Order was submitted with quantity `2`.
+- Temporary workflow was deactivated after verification and now returns `404 Active version not found`.
+
+### Negative Cases
+
+Workflow artifact:
+
+```text
+n8n-webhook-erpnext-buying-v2-negative-cases-test.workflow.json
+```
+
+Live test result:
+
+- `POST /webhook/erpnext-buying-v2-negative-cases-test` returned `200 OK` with safe summarized failures.
+- Duplicate Supplier creation failed as expected.
+- Purchase Order missing required Supplier failed as expected.
+- Cancelling linked Purchase Order `PUR-ORD-2026-00003` failed as expected.
+- Deleting submitted Purchase Receipt `MAT-PRE-2026-00003` failed as expected.
+- Reading fake Purchase Order document name containing slash and spaces failed as expected.
+- Security scan summary returned `securityFindings: []`.
+- Wrong API key was tested directly against ERPNext/Frappe and returned `401 AuthenticationError`.
+- Temporary workflow was deactivated after verification and now returns `404 Active version not found`.
