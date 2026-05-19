@@ -1,5 +1,10 @@
 # n8n-nodes-erpnext-buying
 
+[![Live tested](https://img.shields.io/badge/live--tested-ERPNext%20v16%20%2F%20n8n%20self--hosted%20%2F%20LXD%20%2F%20API%20v2-C47F00)](#live-tested-status)
+[![Runtime audit](https://img.shields.io/badge/runtime%20audit-0%20vulnerabilities-2E7D5F)](#development)
+[![Node checks](https://img.shields.io/badge/n8n%20node%20lint%20%2B%20build-passing-2E7D5F)](#development)
+[![Package](https://img.shields.io/badge/package-0.1.1-2490EF)](./package.json)
+
 Community n8n node package for ERPNext/Frappe Buying v15-v16.
 
 This package is part of the `n8n2erpnext` ecosystem. It focuses on ERPNext procurement and supplier-side workflows, while keeping generic escape hatches for custom DocTypes and whitelisted Frappe methods.
@@ -16,6 +21,24 @@ The Stock validation suite includes end-to-end workflows that connect Buying, St
 - Ledger validation: `Bin`, `Stock Ledger Entry`, Purchase Receipt, Purchase Invoice, Sales Invoice, and Stock Entry documents are verified after submit.
 
 This proves the Buying node participates in the full operational chain: purchasing goods into the business, handing inventory to Stock, and preserving accounting integrity after invoicing.
+
+## Live-Tested Status
+
+This package has been live-tested end to end on the project ERPNext/Frappe test environment:
+
+| Area | Status |
+| --- | --- |
+| ERPNext/Frappe target | Live-tested on ERPNext v16/Frappe v16 behavior |
+| n8n runtime | Live-tested on self-hosted n8n `2.20.7-exp.0` |
+| Infrastructure | Live-tested through LXD ERPNext container at `http://10.192.135.2:8001` with host header `erp.thaiduy.digital` |
+| API coverage | Live-tested with Frappe API v1 read workflows and API v2 document workflows |
+| Module lifecycle | Supplier, RFQ, Supplier Quotation, Purchase Order, Purchase Receipt, Purchase Invoice bridge, and amendment/negative cases |
+| Ecosystem coverage | Buying -> Stock -> Selling -> Accounting end-to-end workflows |
+| Cross-module lock coverage | Linked Purchase Invoice blocks unsafe Purchase Receipt cancellation |
+| Security response policy | Public webhook responses were allowlisted summaries; `securityFindings: []` |
+| Cleanup | Temporary workflows were deactivated and verified as `404 Active version not found` |
+
+The live verification used traceable demo records in the ERPNext LXD test instance. The README intentionally includes test infrastructure routing values and document IDs, but no API keys, API secrets, Authorization headers, database passwords, npm tokens, or credential material.
 
 ## Who This Is For
 
