@@ -4,6 +4,19 @@ Community n8n node package for ERPNext/Frappe Buying v15-v16.
 
 This package is part of the `n8n2erpnext` ecosystem. It focuses on ERPNext procurement and supplier-side workflows, while keeping generic escape hatches for custom DocTypes and whitelisted Frappe methods.
 
+## Connected Ecosystem Coverage
+
+Buying is live-tested as part of a connected ERPNext business lifecycle, not as a standalone procurement helper.
+
+The Stock validation suite includes end-to-end workflows that connect Buying, Stock, Selling, and Accounting:
+
+- Standard Product Lifecycle: Supplier -> Purchase Receipt -> inventory increase -> Purchase Invoice -> Customer Sale -> Sales Invoice `update_stock = 1` -> inventory decrease.
+- Exception / After-Sales Lifecycle: sale -> return credit note -> warranty warehouse -> defective warehouse -> repair/virtual workshop -> disposal.
+- Cross-module lock validation: linked Purchase Invoice blocks unsafe Purchase Receipt cancellation.
+- Ledger validation: `Bin`, `Stock Ledger Entry`, Purchase Receipt, Purchase Invoice, Sales Invoice, and Stock Entry documents are verified after submit.
+
+This proves the Buying node participates in the full operational chain: purchasing goods into the business, handing inventory to Stock, and preserving accounting integrity after invoicing.
+
 ## Who This Is For
 
 This package is built for teams that run ERPNext Buying and want controlled procurement automations in n8n.
